@@ -18,13 +18,14 @@ const routes = [
     redirect: '/app/dashboard',
     component: AppLayout,
     meta: {
-      requiresGuest: true
+      requiresAuth: true
     },
     children: [
       {
         path: 'dashboard',
         name: 'app.dashboard',
-        component: Dashboard
+        component: Dashboard ,
+
       },
     ]
   },
@@ -60,12 +61,13 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes
 })
 
 
 router.beforeEach((to, from, next) => {
+  
   if (to.meta.requiresAuth && !store.state.user.token) {
     next({name: 'login'})
   } else if (to.meta.requiresGuest && store.state.user.token) {
