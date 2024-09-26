@@ -25,3 +25,61 @@ export function logout({commit}) {
       return response;
     })
 }
+
+export function getProducts ( { commit }, { url = null, search = '', per_page , sort_field , sort_direction  } = {}) {
+  commit('setProduct', [true])
+  url = url || 'products'
+
+  return axiosClient.get(url, {
+    params: { search, per_page ,  sort_field , sort_direction}
+  })
+    .then((response) => {
+      commit('setProduct', [false, response.data])
+    })
+    .catch(() => {
+      commit('setProduct', [false]) 
+    })
+}
+export function getProduct({commit}, id) {
+  return axiosClient.get(`/products/${id}`)
+}
+export function createProduct ({commit ,state} , data ) {
+
+  const form = new FormData();
+  form.append('title' , data.title)
+  data.images.forEach(im => form.append('images[]', im.file))
+  form.append('description' , data.description)
+  form.append('price' , data.price)
+  form.append('quantity' , data.quantity)
+  data = form;
+  return axiosClient.post('products' , data , {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+
+}
+
+export function updateProduct({ commit }, product) {
+  const id = product.id
+  if (product.images && product.images.length) {
+    const form = new FormData();
+    form.append('id', product.id);
+    form.append('title', product.title);
+    if (product.images) {
+      product.images.forEach(im => form.append('images[]', im.file))
+    }
+    form.append('description', product.description || '');
+    form.append('price', product.price);
+    form.append('_method', 'PUT');
+    product = form;
+  } else {
+    product._method = 'PUT'
+  }
+  return axiosClient.post(`/products/${id}`, product)
+}
+
+export function deleteProduct({commit} , id) {
+    return axiosClient.delete(`/products/${id}`)
+}
+
