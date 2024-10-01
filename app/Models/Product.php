@@ -20,7 +20,7 @@ class Product extends Model
             ->saveSlugsTo('slug');
     }
 
-    public function images () {
+    function images () {
         return $this->hasMany(ProductImage::class);
     }
 }
