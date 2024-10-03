@@ -42,6 +42,7 @@ export function getProducts ( { commit }, { url = null, search = '', per_page , 
 }
 export function getProduct({commit}, id) {
   return axiosClient.get(`/products/${id}`)
+
 }
 export function createProduct ({commit ,state} , data ) {
 
@@ -61,6 +62,7 @@ export function createProduct ({commit ,state} , data ) {
 }
 
 export function updateProduct({ commit }, product) {
+  // debugger;
   const id = product.id
   if (product.images && product.images.length) {
     const form = new FormData();
@@ -70,6 +72,11 @@ export function updateProduct({ commit }, product) {
       product.images.forEach(im => form.append('images[]', im.file))
     }
     form.append('description', product.description || '');
+    if (product.deleted_images) {
+      product.deleted_images.forEach((imageId, index) => {
+        form.append('deleted_images[]', imageId);
+      });
+    }    
     form.append('price', product.price);
     form.append('_method', 'PUT');
     product = form;

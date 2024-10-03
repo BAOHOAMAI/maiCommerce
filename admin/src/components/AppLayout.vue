@@ -8,7 +8,7 @@
       <Navbar @toggle-sidebar="toggleSidebar"></Navbar>
       <!--      Content-->
       <main class="p-6">
-        <router-view></router-view>
+        <RouterView></RouterView>
       </main>
       <!--      Content-->
     </div>
@@ -24,6 +24,7 @@ import Sidebar from "./Sidebar.vue";
 import Navbar from "./Navbar.vue";
 import store from "../store";
 import Spinner from "./core/Spinner.vue";
+import { RouterLink, RouterView } from 'vue-router'
 // import Toast from "./core/Toast.vue";
 
 const {title} = defineProps({

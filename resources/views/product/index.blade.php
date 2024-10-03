@@ -51,13 +51,13 @@
     x-data="productItem({{ json_encode([
         'id' => $product->id,
         'slug' => $product->slug,
-        'image' => !$product->images ?  URL::to(Storage::url($product->images->first()->path)) : '/img/noimage.png',
+        'image' => $product->images->isNotEmpty() ? URL::to(Storage::url($product->images->first()->path)) : '/img/noimage.png' ,
         'title' => $product->title,
         'price' => $product->price,
     ]) }})"
     class="border border-1 border-gray-200 rounded-md hover:border-purple-600 transition-colors bg-white"
 >
-        <a href=""
+        <a href="{{ route('product.view', $product->slug) }}"
            class="aspect-w-3 aspect-h-2 block overflow-hidden">
             <img
                 :src="product.image"
@@ -67,7 +67,7 @@
         </a>
         <div class="p-4">
             <h3 class="text-lg">
-                <a href="">
+                <a href="{{ route('product.view', $product->slug) }}">
                     {{ $product->title }}
                 </a>
             </h3>
@@ -81,6 +81,6 @@
     </div>
     <!--/ Product Item -->
 @endforeach
-
         </div>
+        {{$products->appends(['sort' => request('sort'), 'search' => request('search')])->links()}}
 </x-app-layout>

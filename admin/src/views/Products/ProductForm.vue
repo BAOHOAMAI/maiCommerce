@@ -13,6 +13,24 @@
           <CustomInput class="mb-2" v-model="product.title" label="Product Title" :errors="errors['title']"/>
           <CustomInput type="richtext" class="mb-2" v-model="product.description" label="Description" :errors="errors['description']"/>
           <CustomInput type="file" class="mb-2" v-model="product.images" label="Product Image" :errors="errors['images']"/>
+          <div v-for="(myFile, ind) of product.images">
+                <div
+                    class="group aspect-square bg-blue-100 flex flex-col items-center justify-center text-gray-500 relative border-2"
+                    >
+
+                    <button
+                        type="button"
+                        @click="removeFile(myFile)"
+                        class="absolute z-20 right-3 top-3 w-7 h-7 flex items-center justify-center bg-black/30 text-white rounded-full hover:bg-black/40">
+                        <TrashIcon class="h-5 w-5"/>
+                    </button>
+
+                    <img
+                          :src="myFile.url"
+                          class="object-contain aspect-square"
+                          />
+                </div>
+            </div>
           <CustomInput type="number" class="mb-2" v-model="product.price" label="Price" prepend="$" :errors="errors['price']"/>
           <CustomInput type="number" class="mb-2" v-model="product.quantity" label="Quantity" :errors="errors['quantity']"/>
           <CustomInput type="checkbox" class="mb-2" v-model="product.published" label="Published" :errors="errors['published']"/>
@@ -42,17 +60,17 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref , computed} from 'vue'
 import CustomInput from "../../components/core/CustomInput.vue";
 import store from "../../store/index.js";
 import Spinner from "../../components/core/Spinner.vue";
 import {useRoute, useRouter} from "vue-router";
 import axiosClient from "../../axios.js";
+import { TrashIcon } from '@heroicons/vue/outline'
 
 const route = useRoute()
 const router = useRouter()
 const errors = ref({});
-console.log(route.params)
 const loading = ref(false)
 const options = ref([])
 const attachmentFiles = ref([]);
@@ -70,7 +88,11 @@ const product = ref({
   categories: []
 })
 
-
+  function removeFile(myFile) {
+    console.log( product.value.deleted_images);
+    product.value.images =product.value.images.filter(f => f !== myFile);
+    product.value.deleted_images.push(myFile.id);
+  }
 
   const emit = defineEmits(['update:modelValue', 'close'])
 
@@ -80,12 +102,13 @@ const product = ref({
       store.dispatch('getProduct', route.params.id)
         .then((response) => {
           loading.value = false;
-          product.value = response.data
+          product.value = {
+            ...response.data,
+            deleted_images : product.value.deleted_images || [],
+          }
         })
     }
-
   })
-
 
   function onSubmit($event, close = false) {
   loading.value = true

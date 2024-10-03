@@ -76,43 +76,43 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, Product $product)
     {
-        $data = $request->validated(); 
+        $data = $request->validated();
         $user = $request->user();
         $images = $request->file('images') ?? [];
 
-        if (count($images) > 0) {
-            $imagesOld = ProductImage::where('product_id', $product->id)->get();
-    
-            foreach ($imagesOld as $old) {
-                if (Storage::disk('public')->exists($old->path)) {
-                    Storage::disk('public')->delete($old->path);
+        if (!empty($data['deleted_images'])) {
+            foreach ($data['deleted_images'] as $imageId) {
+                $image = ProductImage::find($imageId);
+                if ($image) {
+                    if (Storage::disk('public')->exists($image->path)) {
+                        Storage::disk('public')->delete($image->path); 
+                    }
+                    $image->delete(); 
                 }
-                $old->delete();
             }
-        }
-
+        };
+    
         try {
             $product->update($data);
-            
+    
             foreach ($images as $image) {
-                
                 $path = $image->store('image/' . $product->id, 'public');
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'url' => $image->getClientOriginalName(), 
-                    'created_by' => $user->id, 
-                    'mime' => $image->getMimeType(), 
+                    'url' => $path,
+                    'created_by' => $user->id,
+                    'mime' => $image->getMimeType(),
                     'path' => $path
                 ]);
             }
-            
         } catch (\Throwable $th) {
             Log::error('Error storing product image: ' . $th->getMessage());
             throw $th;
         }
-
+    
         return new ProductResource($product);
     }
+    
 
     /**
      * Remove the specified resource from storage.
